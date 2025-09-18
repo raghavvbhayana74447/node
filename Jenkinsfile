@@ -33,7 +33,7 @@ pipeline {
 
         stage('Setup Azure Web App') {
             steps {
-                withCredentials(string[azureServicePrincipal(credentials_id: 'AzureServicePrincipal')]) {
+                withCredentials([azureServicePrincipal(credentials_id: 'AzureServicePrincipal')]) {
                  sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
                         az account set --subscription $subscriptionId     
                         echo "Checking Web App..."
@@ -50,7 +50,7 @@ pipeline {
 
         stage('Deploy to Azure with CLI') {
             steps {
-                withCredentials(string[azureServicePrincipal(credentials_id: 'AzureServicePrincipal')]) {
+                withCredentials([azureServicePrincipal(credentials_id: 'AzureServicePrincipal')]) {
                 sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
                         az account set --subscription $subscriptionId
 
