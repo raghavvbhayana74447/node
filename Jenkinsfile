@@ -36,7 +36,7 @@ pipeline{
                 withCredentials([string(credentialsId: 'AzureServicePrincipal', variable: 'logincreds')])
                 {
                     azureWebappPublish azureCredentialsId : "$logincreds",
-                        resourceGroup: "RnD-RaghavRG"
+                        resourceGroup: "RnD-RaghavRG",
                         appName: "mywebapp74447"
                 }
             }
