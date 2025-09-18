@@ -31,10 +31,12 @@ pipeline{
         }
         stage('deploying'){
             steps{
-                echo "deploying"
-                sh '''
-                node server.js
-                '''
+                echo "deploying on azure app service"
+                withCredentials([string(credentialsId: 'AzureServicePrincipal', variable: 'logincreds')]){
+                    azureWebappPublish azureCredentialsId : "$(logincreds)",
+                        resourceGroup: "RnD-RaghavRG"
+                        appName: "mywebapp74447"
+                }
             }
         }
     }
