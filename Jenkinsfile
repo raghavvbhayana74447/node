@@ -1,5 +1,6 @@
 pipeline{
     agent { label 'cloud-agent'}
+
     tools{
         nodejs "node"
     }
@@ -7,12 +8,14 @@ pipeline{
     stages{
         stage('pulling git repo'){
             steps{
+                echo "pulling repo"
                 git url: 'https://github.com/raghavvbhayana74447/node.git',
                 branch: 'main'
             }
         }
         stage('installing dependencies'){
             steps{
+                echo "installing dependencies"
                 sh '''
                 npm install
                 '''
@@ -20,6 +23,7 @@ pipeline{
         }
         stage('test'){
             steps{
+                echo "running tests"
                 sh '''
                 npm test
                 '''
@@ -27,6 +31,7 @@ pipeline{
         }
         stage('deploying'){
             steps{
+                echo "deploying"
                 sh '''
                 node server.js
                 '''
