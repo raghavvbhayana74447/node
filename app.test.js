@@ -9,6 +9,6 @@ app.get('/', (req, res) => {
 describe('GET /', () => {
   it('should return Hello message', async () => {
     const res = await request(app).get('/');
-    expect(res.text).toBe('Hello from Jenkins Node.js App 🚀');
+    expect(res.text).toBe('Hello from Jenkins Node.js App , version 5🚀');
   });
 });
