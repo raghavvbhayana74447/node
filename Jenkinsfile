@@ -33,15 +33,9 @@ pipeline {
 
         stage('Setup Azure Web App') {
             steps {
-                withAzureCredentials(credentials: 'AzureServicePrincipal') {
-                    sh '''
-                        echo "Logging into Azure..."
-                        az login --service-principal \
-                          -u $ClientId \
-                          -p $ClientSecret \
-                          --tenant $tenantId
-                        az account set --subscription $subscriptionId
-
+                withCredentials([AzureServicePrincipal('credentials_id')]) {
+                 sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
+                        az account set --subscription $subscriptionId     
                         echo "Checking Web App..."
                         az webapp show --resource-group $RESOURCE_GROUP --name $APP_NAME || \
                         az webapp create \
@@ -56,13 +50,8 @@ pipeline {
 
         stage('Deploy to Azure with CLI') {
             steps {
-                withAzureCredentials(credentials: 'AzureServicePrincipal') {
-                    sh '''
-                        echo "Logging into Azure..."
-                        az login --service-principal \
-                          -u $ClientId \
-                          -p $ClientSecret \
-                          --tenant $tenantId
+                withCredentials([AzureServicePrincipal('credentials_id')]) {
+                sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
                         az account set --subscription $subscriptionId
 
                         echo "Zipping app..."
@@ -73,8 +62,7 @@ pipeline {
                           --resource-group $RESOURCE_GROUP \
                           --name $APP_NAME \
                           --src app.zip
-
-                        
+                       
                     '''
                 }
             }
