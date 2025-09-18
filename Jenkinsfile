@@ -1,45 +1,62 @@
-pipeline{
-    agent { label 'cloud-agent'}
+pipeline {
+    agent { label 'cloud-agent' }
 
-    tools{
+    tools {
         nodejs "node"
     }
 
-    stages{
-        stage('pulling git repo'){
-            steps{
-                echo "pulling repo"
-                git url: 'https://github.com/raghavvbhayana74447/node.git',
-                branch: 'main'
+    environment {
+        RESOURCE_GROUP = "RnD-RaghavRG"
+        APP_NAME       = "mywebapp74447"
+        LOCATION       = "eastus"         
+    }
+
+    stages {
+        stage('Pulling Git Repo') {
+            steps {
+                git url: 'https://github.com/raghavvbhayana74447/node.git', branch: 'main'
             }
         }
-        stage('installing dependencies'){
-            steps{
-                echo "installing dependencies"
-                sh '''
-                npm install
-                '''
+
+        stage('Installing Dependencies') {
+            steps {
+                sh 'npm install'
             }
         }
-        stage('test'){
-            steps{
-                echo "running tests"
-                sh '''
-                npm test
-                '''
+
+        stage('Test') {
+            steps {
+                sh 'npm test'
             }
         }
-        stage('deploying')
-        {
-            steps{
-                echo "deploying on azure app service"
-                withCredentials([string(credentialsId: 'AzureServicePrincipal', variable: 'logincreds')])
-                {
-                    azureWebappPublish azureCredentialsId : "$logincreds",
-                        resourceGroup: "RnD-RaghavRG",
-                        appName: "mywebapp74447"
+
+        stage('Deploy to Azure with CLI') {
+            steps {
+                withCredentials([
+                    usernamePassword(credentialsId: 'AzureServicePrincipal',
+                                     usernameVariable: 'CLIENT_ID',
+                                     passwordVariable: 'CLIENT_SECRET'),
+                    string(credentialsId: 'AzureTenant', variable: 'TENANT_ID'),
+                    string(credentialsId: 'AzureSubscription', variable: 'SUBSCRIPTION_ID')
+                ]) {
+                    sh '''
+                        echo "Logging into Azure..."
+                        az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET --tenant $TENANT_ID
+                        az account set --subscription $SUBSCRIPTION_ID
+
+                        echo "Zipping app..."
+                        zip -r app.zip * .[^.]* || true
+
+                        echo "Deploying to Azure Web App..."
+                        az webapp deployment source config-zip \
+                          --resource-group $RESOURCE_GROUP \
+                          --name $APP_NAME \
+                          --src app.zip
+                    '''
                 }
             }
         }
     }
+
+
 }
