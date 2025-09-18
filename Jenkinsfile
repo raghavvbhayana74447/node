@@ -8,7 +8,7 @@ pipeline {
     environment {
         RESOURCE_GROUP = "RnD-RaghavRG"
         APP_NAME       = "mywebapp74447"
-        PLAN_NAME      = "ASP-RnDRaghavRG-b5a6"   // your existing plan
+        PLAN_NAME      = "ASP-RnDRaghavRG-b5a6"   
         LOCATION       = "eastus"         
     }
 
@@ -33,20 +33,22 @@ pipeline {
 
         stage('Setup Azure Web App') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AzureClientId', variable: 'CLIENT_ID'),
-                    string(credentialsId: 'AzureClientSecret', variable: 'CLIENT_SECRET'),
-                    string(credentialsId: 'AzureTenant', variable: 'TENANT_ID'),
-                    string(credentialsId: 'AzureSubscription', variable: 'SUBSCRIPTION_ID')
-                ]) {
+                withAzureCredentials(credentials: 'AzureServicePrincipal') {
                     sh '''
                         echo "Logging into Azure..."
-                        az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET --tenant $TENANT_ID
-                        az account set --subscription $SUBSCRIPTION_ID
+                        az login --service-principal \
+                          -u $ClientId \
+                          -p $ClientSecret \
+                          --tenant $tenantId
+                        az account set --subscription $subscriptionId
 
                         echo "Checking Web App..."
                         az webapp show --resource-group $RESOURCE_GROUP --name $APP_NAME || \
-                        az webapp create --resource-group $RESOURCE_GROUP --plan $PLAN_NAME --name $APP_NAME --runtime "NODE|20-lts"
+                        az webapp create \
+                          --resource-group $RESOURCE_GROUP \
+                          --plan $PLAN_NAME \
+                          --name $APP_NAME \
+                          --runtime "NODE|20-lts"
                     '''
                 }
             }
@@ -54,16 +56,14 @@ pipeline {
 
         stage('Deploy to Azure with CLI') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AzureClientId', variable: 'CLIENT_ID'),
-                    string(credentialsId: 'AzureClientSecret', variable: 'CLIENT_SECRET'),
-                    string(credentialsId: 'AzureTenant', variable: 'TENANT_ID'),
-                    string(credentialsId: 'AzureSubscription', variable: 'SUBSCRIPTION_ID')
-                ]) {
+                withAzureCredentials(credentials: 'AzureServicePrincipal') {
                     sh '''
                         echo "Logging into Azure..."
-                        az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET --tenant $TENANT_ID
-                        az account set --subscription $SUBSCRIPTION_ID
+                        az login --service-principal \
+                          -u $ClientId \
+                          -p $ClientSecret \
+                          --tenant $tenantId
+                        az account set --subscription $subscriptionId
 
                         echo "Zipping app..."
                         zip -r app.zip * .[^.]* || true
