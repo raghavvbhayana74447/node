@@ -55,7 +55,7 @@ pipeline {
                         az account set --subscription $subscriptionId
 
                         echo "Zipping app..."
-                        zip -r app.zip * .[^.]* || true
+                        zip -r app.zip .
 
                         echo "Deploying to Azure Web App..."
                         az webapp deployment source config-zip \
