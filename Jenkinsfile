@@ -34,7 +34,9 @@ pipeline {
         stage('Setup Azure Web App') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: 'AzureServicePrincipal')]) {
-                 sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
+                 sh ''' 
+                        az logout 
+                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
                         az account set --subscription $AZURE_SUBSCRIPTION_ID    
                         echo "Checking Web App..."
                         az webapp show --resource-group $RESOURCE_GROUP --name $APP_NAME || \
@@ -51,7 +53,8 @@ pipeline {
         stage('Deploy to Azure with CLI') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: 'AzureServicePrincipal')]) {
-                sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
+                sh ''' az logout 
+                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
                         az account set --subscription $AZURE_SUBSCRIPTION_ID
                         
 
