@@ -55,9 +55,9 @@ pipeline {
                         az account set --subscription $AZURE_SUBSCRIPTION_ID
                         
 
-                        sudo apt-get install zip
-                        sudo apt-get install unzip
-                        
+                        sudo apt-get install zip -y
+                        sudo apt-get install unzip -y
+
                         echo "Zipping app..."
                         zip -r app.zip .
 
