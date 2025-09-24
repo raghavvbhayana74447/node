@@ -52,7 +52,7 @@ pipeline {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: 'AzureServicePrincipal')]) {
                 sh ''' az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
-                        az account set --subscription $subscriptionId
+                        az account set --subscription $AZURE_SUBSCRIPTION_ID
 
                         echo "Zipping app..."
                         zip -r app.zip .
